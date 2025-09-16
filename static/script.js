@@ -1,9 +1,11 @@
+// script.js
+
 // Aguarda o HTML ser completamente carregado para executar o script
 document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Referências dos elementos HTML
     const emailInput = document.getElementById('email-input');
-    const fileInput = document.getElementById('file-input'); // Novo elemento
+    const fileInput = document.getElementById('file-input');
     const analyzeBtn = document.getElementById('analyze-btn');
     const resultSection = document.getElementById('result-section');
     const categoryResult = document.getElementById('category-result');
@@ -32,60 +34,54 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             categoryResult.textContent = data.categoria;
             responseResult.textContent = data.resposta_sugerida;
-            categoryResult.style.color = '#333';
+            categoryResult.style.color = '#333'; // Reseta a cor em caso de sucesso
         }
     };
 
-    // 2. Adiciona o ouvinte de evento para o clique no botão
-    analyzeBtn.addEventListener('click', async () => {
-        const emailText = emailInput.value.trim();
+    /**
+     * Lógica principal acionada pelo clique do botão "Analisar".
+     */
+    analyzeBtn.addEventListener('click', () => {
         const file = fileInput.files[0];
+        const emailText = emailInput.value.trim();
 
-        let contentToSend = '';
-
+        // Prioriza o arquivo se ambos forem fornecidos
         if (file) {
-            // Se um arquivo for selecionado, lê o conteúdo dele
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                contentToSend = event.target.result;
-                if (contentToSend.trim() === '') {
-                    alert('O arquivo selecionado está vazio.');
-                    return;
-                }
-                analyzeContent(contentToSend);
-            };
-            reader.onerror = () => {
-                alert('Ocorreu um erro ao ler o arquivo.');
-            };
-            reader.readAsText(file);
-        } else if (emailText !== '') {
-            // Se não houver arquivo, usa o texto da textarea
-            contentToSend = emailText;
-            analyzeContent(contentToSend);
+            const formData = new FormData();
+            formData.append('file', file);
+            analyzeContent(formData, 'file'); // Envia o objeto FormData
+        } else if (emailText) {
+            const jsonData = JSON.stringify({ email: emailText });
+            analyzeContent(jsonData, 'json'); // Envia a string JSON
         } else {
-            alert('Por favor, insira o texto de um e-mail ou selecione um arquivo .txt.');
-            return;
+            alert('Por favor, insira o texto de um e-mail ou selecione um arquivo.');
         }
     });
 
     /**
-     * Função auxiliar para enviar o conteúdo para o backend.
-     * @param {string} emailContent - O conteúdo do e-mail a ser analisado.
+     * Função unificada para enviar o conteúdo para o backend.
+     * @param {FormData|string} payload - O corpo da requisição (FormData ou JSON).
+     * @param {'file'|'json'} type - O tipo de conteúdo sendo enviado.
      */
-    const analyzeContent = async (emailContent) => {
+    const analyzeContent = async (payload, type) => {
         resultSection.classList.add('hidden');
         updateButtonState(true);
 
-        try {
-            // 3. Faz a requisição ao backend
-            const response = await fetch('http://127.0.0.1:5000/processar-email', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: emailContent }),
-            });
+        // Configurações da requisição variam com base no tipo de conteúdo
+        const requestOptions = {
+            method: 'POST',
+            body: payload,
+        };
+        
+        // Se for JSON, adiciona o header específico. Se for FormData, o browser adiciona o header correto.
+        if (type === 'json') {
+            requestOptions.headers = {
+                'Content-Type': 'application/json',
+            };
+        }
 
+        try {
+            const response = await fetch('http://127.0.0.1:5000/processar-email', requestOptions);
             const result = await response.json();
 
             if (!response.ok) {
@@ -101,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateButtonState(false);
             // Limpa os campos após a análise
             emailInput.value = '';
-            fileInput.value = ''; 
+            fileInput.value = ''; // Limpa a seleção do arquivo
         }
     };
 });
