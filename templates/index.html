@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -11,12 +11,16 @@
     <main class="container">
         <header>
             <h1>Analisador de E-mails com IA</h1>
-            <p>Cole o texto do seu e-mail abaixo para classificar e obter uma sugestão de resposta.</p>
+            <p>Cole o texto do seu e-mail abaixo ou envie um arquivo (.txt) para classificar e obter uma sugestão de resposta.</p>
         </header>
 
         <section class="input-section">
             <textarea id="email-input" rows="10" placeholder="Digite ou cole o texto do e-mail aqui..."></textarea>
-            <button id="analyze-btn">Analisar E-mail</button>
+            
+            <label for="file-input" class="file-upload-label">Ou envie um arquivo .txt:</label>
+            <input type="file" id="file-input" accept=".txt">
+
+            <button id="analyze-btn">Analisar</button>
         </section>
 
         <section id="result-section" class="hidden">

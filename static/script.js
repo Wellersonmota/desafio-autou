@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Referências dos elementos HTML
     const emailInput = document.getElementById('email-input');
+    const fileInput = document.getElementById('file-input'); // Novo elemento
     const analyzeBtn = document.getElementById('analyze-btn');
     const resultSection = document.getElementById('result-section');
     const categoryResult = document.getElementById('category-result');
@@ -14,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const updateButtonState = (isAnalyzing) => {
         analyzeBtn.disabled = isAnalyzing;
-        analyzeBtn.textContent = isAnalyzing ? 'Analisando...' : 'Analisar E-mail';
+        analyzeBtn.textContent = isAnalyzing ? 'Analisando...' : 'Analisar';
     };
     
     /**
@@ -29,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
             responseResult.textContent = `Ocorreu um problema: ${data.erro}`;
             categoryResult.style.color = 'red';
         } else {
-            // Agora, acessamos ambas as chaves da resposta da IA
             categoryResult.textContent = data.categoria;
             responseResult.textContent = data.resposta_sugerida;
             categoryResult.style.color = '#333';
@@ -39,12 +39,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Adiciona o ouvinte de evento para o clique no botão
     analyzeBtn.addEventListener('click', async () => {
         const emailText = emailInput.value.trim();
+        const file = fileInput.files[0];
 
-        if (emailText === '') {
-            alert('Por favor, insira o texto de um e-mail.');
+        let contentToSend = '';
+
+        if (file) {
+            // Se um arquivo for selecionado, lê o conteúdo dele
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                contentToSend = event.target.result;
+                if (contentToSend.trim() === '') {
+                    alert('O arquivo selecionado está vazio.');
+                    return;
+                }
+                analyzeContent(contentToSend);
+            };
+            reader.onerror = () => {
+                alert('Ocorreu um erro ao ler o arquivo.');
+            };
+            reader.readAsText(file);
+        } else if (emailText !== '') {
+            // Se não houver arquivo, usa o texto da textarea
+            contentToSend = emailText;
+            analyzeContent(contentToSend);
+        } else {
+            alert('Por favor, insira o texto de um e-mail ou selecione um arquivo .txt.');
             return;
         }
+    });
 
+    /**
+     * Função auxiliar para enviar o conteúdo para o backend.
+     * @param {string} emailContent - O conteúdo do e-mail a ser analisado.
+     */
+    const analyzeContent = async (emailContent) => {
         resultSection.classList.add('hidden');
         updateButtonState(true);
 
@@ -55,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email: emailText }),
+                body: JSON.stringify({ email: emailContent }),
             });
 
             const result = await response.json();
@@ -71,6 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
             displayResult({ erro: 'Não foi possível conectar ao servidor. Verifique se o backend está rodando.' });
         } finally {
             updateButtonState(false);
+            // Limpa os campos após a análise
+            emailInput.value = '';
+            fileInput.value = ''; 
         }
-    });
+    };
 });
