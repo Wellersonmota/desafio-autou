@@ -1,32 +1,29 @@
+# app.py
 from flask import Flask, request, jsonify
-from ia_service import analisar_email_com_ia # <--- IMPORTANTE: Importamos nossa nova função
 from flask_cors import CORS
-
-# Substitua pela sua chave de API da Hugging Face
-HUGGING_FACE_TOKEN = "token"
+from ia_service import classificar_e_responder # <-- Note a nova função
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
-def home():
-    return "Servidor da API de classificação de emails no ar."
-
 @app.route('/processar-email', methods=['POST'])
 def processar_email():
-    dados = request.get_json()
-    texto_email = dados.get('email_text', '')
+    try:
+        data = request.get_json()
+        email_content = data.get('email', '')
+        
+        if not email_content:
+            return jsonify({'erro': 'Conteúdo do e-mail não fornecido.'}), 400
 
-    if not texto_email:
-        return jsonify({"erro": "Nenhum texto de email fornecido."}), 400
+        # Chama a nova função do serviço de IA
+        resultado_ia = classificar_e_responder(email_content)
 
-    # --- A MÁGICA ACONTECE AQUI ---
-    # Trocamos a lógica simulada pela chamada real à nossa função de IA
-    resultado = analisar_email_com_ia(texto_email, HUGGING_FACE_TOKEN)
-    
-    # Se a função de IA retornar um erro, nós o repassamos
-    if "erro" in resultado:
-        return jsonify(resultado), 500
+        # Retorna o resultado completo da IA para o frontend
+        return jsonify(resultado_ia)
 
-    # Devolvemos a resposta que veio da IA
-    return jsonify(resultado)
+    except Exception as e:
+        return jsonify({'erro': f'Ocorreu um erro no servidor: {str(e)}'}), 500
+
+if __name__ == "__main__":
+    print("Servidor da API de classificação de e-mails no ar.")
+    app.run(debug=True)
