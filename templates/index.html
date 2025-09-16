@@ -1,0 +1,35 @@
+ <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisador de E-mails - AutoU</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+
+    <main class="container">
+        <header>
+            <h1>Analisador de E-mails com IA</h1>
+            <p>Cole o texto do seu e-mail abaixo para classificar e obter uma sugestão de resposta.</p>
+        </header>
+
+        <section class="input-section">
+            <textarea id="email-input" rows="10" placeholder="Digite ou cole o texto do e-mail aqui..."></textarea>
+            <button id="analyze-btn">Analisar E-mail</button>
+        </section>
+
+        <section id="result-section" class="hidden">
+            <h2>Resultado da Análise</h2>
+            <div class="result-box">
+                <p><strong>Categoria:</strong> <span id="category-result"></span></p>
+                <p><strong>Resposta Sugerida:</strong></p>
+                <div id="response-result"></div>
+            </div>
+        </section>
+
+    </main>
+    
+    <script src="../static/script.js"></script>
+</body>
+</html>
