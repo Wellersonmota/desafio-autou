@@ -1,21 +1,28 @@
 # app.py
 import os
-import fitz # Importa a biblioteca PyMuPDF
-from flask import Flask, request, jsonify
+import fitz 
+from flask import Flask, request, jsonify, render_template # <-- Importar render_template
 from flask_cors import CORS
 from ia_service import classificar_e_responder
 
 app = Flask(__name__)
 CORS(app)
 
+# NOVA ROTA PARA SERVIR O FRONTEND
+@app.route('/')
+def home():
+    """
+    Renderiza a página principal da aplicação (index.html).
+    """
+    return render_template('index.html')
+
 @app.route('/processar-email', methods=['POST'])
 def processar_email():
     try:
-        # Verifica se é um upload de arquivo (multipart/form-data)
         if 'file' in request.files:
             file = request.files['file']
             filename = file.filename
-
+            
             if filename.endswith('.pdf'):
                 doc = fitz.open(stream=file.read(), filetype="pdf")
                 email_content = ""
@@ -26,12 +33,11 @@ def processar_email():
                 email_content = file.read().decode('utf-8')
             else:
                 return jsonify({'erro': 'Formato de arquivo não suportado.'}), 400
-
-        # Verifica se é um envio de texto (application/json)
+        
         elif request.is_json:
             data = request.get_json()
             email_content = data.get('email', '')
-
+        
         else:
              return jsonify({'erro': 'Formato de requisição inválido.'}), 400
 
@@ -45,5 +51,5 @@ def processar_email():
         return jsonify({'erro': f'Ocorreu um erro no servidor: {str(e)}'}), 500
 
 if __name__ == "__main__":
-    print("Servidor da API de classificação de e-mails no ar.")
+    print("Servidor iniciado. Acesse http://127.0.0.1:5000 no seu navegador.")
     app.run(debug=True)

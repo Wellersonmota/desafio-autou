@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analisador de E-mails - AutoU</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
     <main class="container">
         <header>
             <h1>Analisador de E-mails com IA</h1>
-            <p>Cole o texto do seu e-mail abaixo ou envie um arquivo (.txt) para classificar e obter uma sugestão de resposta.</p>
+            <p>Cole o texto do seu e-mail abaixo ou envie um arquivo (.txt, .pdf) para classificar e obter uma sugestão de resposta.</p>
         </header>
 
         <section class="input-section">
             <textarea id="email-input" rows="10" placeholder="Digite ou cole o texto do e-mail aqui..."></textarea>
             
-            <label for="file-input" class="file-upload-label">Ou envie um arquivo .txt:</label>
-            <input type="file" id="file-input" accept=".txt">
+            <label for="file-input">Ou envie um arquivo:</label>
+            <input type="file" id="file-input" accept=".txt,.pdf">
 
             <button id="analyze-btn">Analisar</button>
         </section>
@@ -28,12 +28,11 @@
             <div class="result-box">
                 <p><strong>Categoria:</strong> <span id="category-result"></span></p>
                 <p><strong>Resposta Sugerida:</strong></p>
-                <div id="response-result"></div>
+                <pre id="response-result"></pre>
             </div>
         </section>
-
     </main>
-    
-    <script src="../static/script.js"></script>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
